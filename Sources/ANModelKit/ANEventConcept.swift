@@ -19,6 +19,8 @@ public struct ANEventConcept: Identifiable, Codable, Equatable, Hashable, Sendab
 	public var dose: ANDoseConcept?
 	/// The date of the event
 	public var date: Date
+	/// Optional note associated with the event
+	public var note: String?
 
 	/// Initialize a new event concept
 	public init(
@@ -26,13 +28,15 @@ public struct ANEventConcept: Identifiable, Codable, Equatable, Hashable, Sendab
 		eventType: ANEventType,
 		medication: ANMedicationConcept? = nil,
 		dose: ANDoseConcept? = nil,
-		date: Date = Date()
+		date: Date = Date(),
+		note: String? = nil
 	) {
 		self.id = id
 		self.eventType = eventType
 		self.medication = medication
 		self.dose = dose
 		self.date = date
+		self.note = note
 	}
 	
 	/// Create a redacted version with medication names removed
@@ -42,7 +46,8 @@ public struct ANEventConcept: Identifiable, Codable, Equatable, Hashable, Sendab
 			eventType: eventType,
 			medication: medication?.redacted(),
 			dose: dose,
-			date: date
+			date: date,
+			note: note
 		)
 	}
 }
