@@ -33,7 +33,7 @@ Add ANModelKit to your project via Xcode or by adding it to your `Package.swift`
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/yourusername/ANModelKit.git", from: "1.0.0")
+    .package(url: "https://github.com/dan-hart/ANModelKit.git", from: "1.0.0")
 ]
 ```
 
@@ -332,7 +332,7 @@ Contributions are welcome! Please feel free to submit a Pull Request. For major 
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/ANModelKit/issues)
+- **Issues**: [GitHub Issues](https://github.com/dan-hart/ANModelKit/issues)
 - **Medical Disclaimers**: Always consult healthcare professionals for medical advice
 - **Privacy**: Review privacy handling before storing sensitive medical data
 
