@@ -22,6 +22,8 @@ struct ANModelKitModelTests {
 			clinicalName: "Metformin",
 			nickname: "Diabetes Med",
 			quantity: 180.0,
+			initialQuantity: 200.0,
+			displayColorHex: "#3366CC",
 			lastRefillDate: refillDate,
 			nextRefillDate: nextRefillDate,
 			prescribedUnit: unit,
@@ -31,6 +33,8 @@ struct ANModelKitModelTests {
 		#expect(med.clinicalName == "Metformin")
 		#expect(med.nickname == "Diabetes Med")
 		#expect(med.quantity == 180.0)
+		#expect(med.initialQuantity == 200.0)
+		#expect(med.displayColorHex == "#3366CC")
 		#expect(med.lastRefillDate == refillDate)
 		#expect(med.nextRefillDate == nextRefillDate)
 		#expect(med.prescribedUnit == unit)
@@ -42,13 +46,17 @@ struct ANModelKitModelTests {
 		let med = ANMedicationConcept(
 			clinicalName: "Sensitive Drug Name",
 			nickname: "My Secret Med",
-			quantity: 30.0
+			quantity: 30.0,
+			initialQuantity: 60.0,
+			displayColorHex: "#FF5722"
 		)
-		
+
 		let redacted = med.redacted()
 		#expect(redacted.clinicalName == "[REDACTED]")
 		#expect(redacted.nickname == "[REDACTED]")
 		#expect(redacted.quantity == 30.0) // Non-sensitive data preserved
+		#expect(redacted.initialQuantity == 60.0) // Non-sensitive data preserved
+		#expect(redacted.displayColorHex == "#FF5722") // Non-sensitive data preserved
 		#expect(redacted.id == med.id) // ID preserved
 	}
 	
@@ -61,18 +69,55 @@ struct ANModelKitModelTests {
 	
 	@Test("ANMedicationConcept Codable")
 	func testMedicationCodable() async throws {
-		let original = ANMedicationConcept(clinicalName: "Test Med", nickname: "Test")
+		let original = ANMedicationConcept(clinicalName: "Test Med", nickname: "Test", quantity: 30.0, initialQuantity: 50.0, displayColorHex: "#4CAF50")
 		let encoder = JSONEncoder()
 		let decoder = JSONDecoder()
-		
+
 		let data = try encoder.encode(original)
 		let decoded = try decoder.decode(ANMedicationConcept.self, from: data)
-		
+
 		#expect(decoded.id == original.id)
 		#expect(decoded.clinicalName == original.clinicalName)
 		#expect(decoded.nickname == original.nickname)
+		#expect(decoded.quantity == original.quantity)
+		#expect(decoded.initialQuantity == original.initialQuantity)
+		#expect(decoded.displayColorHex == original.displayColorHex)
 	}
 	
+	@Test("ANMedicationConcept initialQuantity functionality")
+	func testMedicationInitialQuantity() async throws {
+		let med = ANMedicationConcept(
+			clinicalName: "Test Medication",
+			quantity: 15.0,
+			initialQuantity: 30.0
+		)
+
+		#expect(med.quantity == 15.0)
+		#expect(med.initialQuantity == 30.0)
+
+		// Test with nil initialQuantity
+		let medNoInitial = ANMedicationConcept(clinicalName: "Test Med 2")
+		#expect(medNoInitial.initialQuantity == nil)
+	}
+
+	@Test("ANMedicationConcept displayColorHex functionality")
+	func testMedicationDisplayColorHex() async throws {
+		let med = ANMedicationConcept(
+			clinicalName: "Test Medication",
+			displayColorHex: "#9C27B0"
+		)
+
+		#expect(med.displayColorHex == "#9C27B0")
+
+		// Test with nil displayColorHex
+		let medNoColor = ANMedicationConcept(clinicalName: "Test Med 2")
+		#expect(medNoColor.displayColorHex == nil)
+
+		// Test different hex formats
+		let medShortHex = ANMedicationConcept(clinicalName: "Test Med 3", displayColorHex: "#F00")
+		#expect(medShortHex.displayColorHex == "#F00")
+	}
+
 	@Test("ANDoseConcept initialization")
 	func testDoseConceptInit() async throws {
 		let dose = ANDoseConcept(amount: 2, unit: ANUnitConcept.puff)
