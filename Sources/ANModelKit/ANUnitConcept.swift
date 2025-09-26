@@ -27,6 +27,9 @@ public enum ANUnitConcept: String, Codable, CaseIterable, Equatable, Hashable, S
 	case film
 	case dose
 	case ampule
+	case bowl
+	case joint
+	case dab
 
 	/// A user-facing string for display in UI.
 	public var displayName: String {
@@ -56,6 +59,9 @@ public enum ANUnitConcept: String, Codable, CaseIterable, Equatable, Hashable, S
 		case .film: return "Film"
 		case .dose: return "Dose"
 		case .ampule: return "Ampule"
+		case .bowl: return "Bowl"
+		case .joint: return "Joint"
+		case .dab: return "Dab"
 		}
 	}
 
@@ -95,6 +101,9 @@ public enum ANUnitConcept: String, Codable, CaseIterable, Equatable, Hashable, S
 		case .film: return count == 1 ? "Film" : "Films"
 		case .dose: return count == 1 ? "Dose" : "Doses"
 		case .ampule: return count == 1 ? "Ampule" : "Ampules"
+		case .bowl: return count == 1 ? "Bowl" : "Bowls"
+		case .joint: return count == 1 ? "Joint" : "Joints"
+		case .dab: return count == 1 ? "Dab" : "Dabs"
 		}
 	}
 
@@ -126,6 +135,9 @@ public enum ANUnitConcept: String, Codable, CaseIterable, Equatable, Hashable, S
 		case .film: return "film"
 		case .dose: return "dose"
 		case .ampule: return "amp"
+		case .bowl: return "bowl"
+		case .joint: return "joint"
+		case .dab: return "dab"
 		}
 	}
 
@@ -157,6 +169,9 @@ public enum ANUnitConcept: String, Codable, CaseIterable, Equatable, Hashable, S
 		case .film: return "A medicated film for buccal or sublingual absorption."
 		case .dose: return "A general dosage unit when no specific type applies."
 		case .ampule: return "A sealed glass container for a single dose of medication."
+		case .bowl: return "A measured amount of cannabis flower consumed via pipe or water pipe."
+		case .joint: return "A cannabis cigarette containing a measured amount of cannabis flower."
+		case .dab: return "A concentrated cannabis extract consumed via vaporization or dabbing."
 		}
 	}
 

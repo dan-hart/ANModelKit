@@ -264,6 +264,9 @@ struct ANUnitConceptTests {
 		#expect(ANUnitConcept.milliliter.abbreviation == "mL")
 		#expect(ANUnitConcept.microgram.abbreviation == "mcg")
 		#expect(ANUnitConcept.drop.abbreviation == "gtt")
+		#expect(ANUnitConcept.bowl.abbreviation == "bowl")
+		#expect(ANUnitConcept.joint.abbreviation == "joint")
+		#expect(ANUnitConcept.dab.abbreviation == "dab")
 	}
 	
 	@Test("clinicalDescription returns non-empty strings")
@@ -284,6 +287,38 @@ struct ANUnitConceptTests {
 			let decoded = try decoder.decode(ANUnitConcept.self, from: data)
 			#expect(decoded == unit)
 		}
+	}
+
+	@Test("Medical marijuana dose units functionality")
+	func testMedicalMarijuanaDoseUnits() async throws {
+		// Test bowl unit
+		let bowl = ANUnitConcept.bowl
+		#expect(bowl.displayName == "Bowl")
+		#expect(bowl.displayName(for: 1) == "Bowl")
+		#expect(bowl.displayName(for: 2) == "Bowls")
+		#expect(bowl.abbreviation == "bowl")
+		#expect(bowl.clinicalDescription.contains("cannabis flower"))
+
+		// Test joint unit
+		let joint = ANUnitConcept.joint
+		#expect(joint.displayName == "Joint")
+		#expect(joint.displayName(for: 1) == "Joint")
+		#expect(joint.displayName(for: 2) == "Joints")
+		#expect(joint.abbreviation == "joint")
+		#expect(joint.clinicalDescription.contains("cannabis cigarette"))
+
+		// Test dab unit
+		let dab = ANUnitConcept.dab
+		#expect(dab.displayName == "Dab")
+		#expect(dab.displayName(for: 1) == "Dab")
+		#expect(dab.displayName(for: 2) == "Dabs")
+		#expect(dab.abbreviation == "dab")
+		#expect(dab.clinicalDescription.contains("concentrated cannabis"))
+
+		// Test they are included in selectableUnits
+		#expect(ANUnitConcept.selectableUnits.contains(.bowl))
+		#expect(ANUnitConcept.selectableUnits.contains(.joint))
+		#expect(ANUnitConcept.selectableUnits.contains(.dab))
 	}
 }
 
