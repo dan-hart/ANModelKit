@@ -230,7 +230,7 @@ struct ANUnitConceptTests {
 	@Test("commonUnits contains expected subset")
 	func testCommonUnits() async throws {
 		let common = ANUnitConcept.commonUnits
-		let expectedCommon: Set<ANUnitConcept> = [.milligram, .milliliter, .unit, .tablet, .capsule, .puff, .drop, .dose]
+		let expectedCommon: Set<ANUnitConcept> = [.milligram, .milliliter, .unit, .tablet, .capsule, .puff, .drop, .dose, .injection, .tablespoon, .pen]
 		#expect(Set(common) == expectedCommon)
 	}
 	
@@ -267,6 +267,10 @@ struct ANUnitConceptTests {
 		#expect(ANUnitConcept.bowl.abbreviation == "bowl")
 		#expect(ANUnitConcept.joint.abbreviation == "joint")
 		#expect(ANUnitConcept.dab.abbreviation == "dab")
+		#expect(ANUnitConcept.injection.abbreviation == "inj")
+		#expect(ANUnitConcept.tablespoon.abbreviation == "tbsp")
+		#expect(ANUnitConcept.pen.abbreviation == "pen")
+		#expect(ANUnitConcept.inhaler.abbreviation == "inh")
 	}
 	
 	@Test("clinicalDescription returns non-empty strings")
@@ -319,6 +323,47 @@ struct ANUnitConceptTests {
 		#expect(ANUnitConcept.selectableUnits.contains(.bowl))
 		#expect(ANUnitConcept.selectableUnits.contains(.joint))
 		#expect(ANUnitConcept.selectableUnits.contains(.dab))
+	}
+
+	@Test("New pharmaceutical dose units functionality")
+	func testNewPharmaceuticalDoseUnits() async throws {
+		// Test injection unit
+		let injection = ANUnitConcept.injection
+		#expect(injection.displayName == "Injection")
+		#expect(injection.displayName(for: 1) == "Injection")
+		#expect(injection.displayName(for: 2) == "Injections")
+		#expect(injection.abbreviation == "inj")
+		#expect(injection.clinicalDescription.contains("needle"))
+
+		// Test tablespoon unit
+		let tablespoon = ANUnitConcept.tablespoon
+		#expect(tablespoon.displayName == "Tablespoon")
+		#expect(tablespoon.displayName(for: 1) == "Tablespoon")
+		#expect(tablespoon.displayName(for: 2) == "Tablespoons")
+		#expect(tablespoon.abbreviation == "tbsp")
+		#expect(tablespoon.clinicalDescription.contains("15 mL"))
+
+		// Test pen unit
+		let pen = ANUnitConcept.pen
+		#expect(pen.displayName == "Pen")
+		#expect(pen.displayName(for: 1) == "Pen")
+		#expect(pen.displayName(for: 2) == "Pens")
+		#expect(pen.abbreviation == "pen")
+		#expect(pen.clinicalDescription.contains("pre-filled"))
+
+		// Test inhaler unit
+		let inhaler = ANUnitConcept.inhaler
+		#expect(inhaler.displayName == "Inhaler")
+		#expect(inhaler.displayName(for: 1) == "Inhaler")
+		#expect(inhaler.displayName(for: 2) == "Inhalers")
+		#expect(inhaler.abbreviation == "inh")
+		#expect(inhaler.clinicalDescription.contains("dry powder"))
+
+		// Test they are included in selectableUnits
+		#expect(ANUnitConcept.selectableUnits.contains(.injection))
+		#expect(ANUnitConcept.selectableUnits.contains(.tablespoon))
+		#expect(ANUnitConcept.selectableUnits.contains(.pen))
+		#expect(ANUnitConcept.selectableUnits.contains(.inhaler))
 	}
 }
 

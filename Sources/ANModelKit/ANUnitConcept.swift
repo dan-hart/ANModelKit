@@ -17,8 +17,11 @@ public enum ANUnitConcept: String, Codable, CaseIterable, Equatable, Hashable, S
 	case drop
 	case sachet
 	case puff
-	case actuation
 	case nebule
+	case injection
+	case tablespoon
+	case pen
+	case inhaler
 	case vial
 	case patch
 	case application
@@ -49,8 +52,11 @@ public enum ANUnitConcept: String, Codable, CaseIterable, Equatable, Hashable, S
 		case .drop: return "Drop"
 		case .sachet: return "Sachet"
 		case .puff: return "Puff"
-		case .actuation: return "Actuation"
 		case .nebule: return "Nebule"
+		case .injection: return "Injection"
+		case .tablespoon: return "Tablespoon"
+		case .pen: return "Pen"
+		case .inhaler: return "Inhaler"
 		case .vial: return "Vial"
 		case .patch: return "Patch"
 		case .application: return "Application"
@@ -91,8 +97,11 @@ public enum ANUnitConcept: String, Codable, CaseIterable, Equatable, Hashable, S
 		case .drop: return count == 1 ? "Drop" : "Drops"
 		case .sachet: return count == 1 ? "Sachet" : "Sachets"
 		case .puff: return count == 1 ? "Puff" : "Puffs"
-		case .actuation: return count == 1 ? "Actuation" : "Actuations"
 		case .nebule: return count == 1 ? "Nebule" : "Nebules"
+		case .injection: return count == 1 ? "Injection" : "Injections"
+		case .tablespoon: return count == 1 ? "Tablespoon" : "Tablespoons"
+		case .pen: return count == 1 ? "Pen" : "Pens"
+		case .inhaler: return count == 1 ? "Inhaler" : "Inhalers"
 		case .vial: return count == 1 ? "Vial" : "Vials"
 		case .patch: return count == 1 ? "Patch" : "Patches"
 		case .application: return count == 1 ? "Application" : "Applications"
@@ -125,8 +134,11 @@ public enum ANUnitConcept: String, Codable, CaseIterable, Equatable, Hashable, S
 		case .drop: return "gtt"
 		case .sachet: return "sach"
 		case .puff: return "puff"
-		case .actuation: return "act"
 		case .nebule: return "neb"
+		case .injection: return "inj"
+		case .tablespoon: return "tbsp"
+		case .pen: return "pen"
+		case .inhaler: return "inh"
 		case .vial: return "vial"
 		case .patch: return "patch"
 		case .application: return "app"
@@ -159,8 +171,11 @@ public enum ANUnitConcept: String, Codable, CaseIterable, Equatable, Hashable, S
 		case .drop: return "A single drop, used for eye, ear, or nasal medications."
 		case .sachet: return "A small packet containing powder or granules."
 		case .puff: return "A single actuation of an inhaler."
-		case .actuation: return "Release of a dose from a device, such as an inhaler."
 		case .nebule: return "A unit-dose container for nebulizer medications."
+		case .injection: return "A dose delivered via needle into muscle, vein, or subcutaneous tissue."
+		case .tablespoon: return "A household volume measurement, approximately 15 mL."
+		case .pen: return "A pre-filled injection device, commonly used for insulin or biologics."
+		case .inhaler: return "A dose delivered via dry powder inhaler device."
 		case .vial: return "A small bottle for injectable or inhalation medications."
 		case .patch: return "A medicated adhesive applied to the skin."
 		case .application: return "A single use of a topical product (cream, ointment, gel, etc.)."
@@ -188,7 +203,10 @@ public enum ANUnitConcept: String, Codable, CaseIterable, Equatable, Hashable, S
 			.capsule,
 			.puff,
 			.drop,
-			.dose
+			.dose,
+			.injection,
+			.tablespoon,
+			.pen
 		]
 	}
 }
