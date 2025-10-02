@@ -22,9 +22,11 @@ public struct ANMedicationConcept: Identifiable, Codable, Equatable, Hashable, S
 	public var prescribedUnit: ANUnitConcept?
 	/// Prescribed Dose Amount
 	public var prescribedDoseAmount: Double?
+	/// SF Symbol configuration for visual representation
+	public var symbolInfo: ANSymbolInfo?
 
 	/// Initialize a new medication concept
-	public init(id: UUID = UUID(), clinicalName: String, nickname: String? = nil, quantity: Double? = nil, initialQuantity: Double? = nil, displayColorHex: String? = nil, lastRefillDate: Date? = nil, nextRefillDate: Date? = nil, prescribedUnit: ANUnitConcept? = nil, prescribedDoseAmount: Double? = nil) {
+	public init(id: UUID = UUID(), clinicalName: String, nickname: String? = nil, quantity: Double? = nil, initialQuantity: Double? = nil, displayColorHex: String? = nil, lastRefillDate: Date? = nil, nextRefillDate: Date? = nil, prescribedUnit: ANUnitConcept? = nil, prescribedDoseAmount: Double? = nil, symbolInfo: ANSymbolInfo? = nil) {
 		self.id = id
 		self.clinicalName = clinicalName
 		self.nickname = nickname
@@ -35,6 +37,7 @@ public struct ANMedicationConcept: Identifiable, Codable, Equatable, Hashable, S
 		self.nextRefillDate = nextRefillDate
 		self.prescribedUnit = prescribedUnit
 		self.prescribedDoseAmount = prescribedDoseAmount
+		self.symbolInfo = symbolInfo
 	}
 	
 	/// Create a redacted version with clinical names and nicknames removed
@@ -49,7 +52,8 @@ public struct ANMedicationConcept: Identifiable, Codable, Equatable, Hashable, S
 			lastRefillDate: lastRefillDate,
 			nextRefillDate: nextRefillDate,
 			prescribedUnit: prescribedUnit,
-			prescribedDoseAmount: prescribedDoseAmount
+			prescribedDoseAmount: prescribedDoseAmount,
+			symbolInfo: symbolInfo
 		)
 	}
 }

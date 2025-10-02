@@ -17,7 +17,8 @@ struct ANModelKitModelTests {
 		let refillDate = Date()
 		let nextRefillDate = Calendar.current.date(byAdding: .day, value: 30, to: refillDate)!
 		let unit = ANUnitConcept.milligram
-		
+		let symbolInfo = ANSymbolInfo(name: "pills.fill", minimumVersion: "14.0", fallbackName: "pills")
+
 		let med = ANMedicationConcept(
 			clinicalName: "Metformin",
 			nickname: "Diabetes Med",
@@ -27,9 +28,10 @@ struct ANModelKitModelTests {
 			lastRefillDate: refillDate,
 			nextRefillDate: nextRefillDate,
 			prescribedUnit: unit,
-			prescribedDoseAmount: 500.0
+			prescribedDoseAmount: 500.0,
+			symbolInfo: symbolInfo
 		)
-		
+
 		#expect(med.clinicalName == "Metformin")
 		#expect(med.nickname == "Diabetes Med")
 		#expect(med.quantity == 180.0)
@@ -39,16 +41,21 @@ struct ANModelKitModelTests {
 		#expect(med.nextRefillDate == nextRefillDate)
 		#expect(med.prescribedUnit == unit)
 		#expect(med.prescribedDoseAmount == 500.0)
+		#expect(med.symbolInfo?.name == "pills.fill")
+		#expect(med.symbolInfo?.minimumVersion == "14.0")
+		#expect(med.symbolInfo?.fallbackName == "pills")
 	}
 	
 	@Test("ANMedicationConcept redacted functionality")
 	func testMedicationRedacted() async throws {
+		let symbolInfo = ANSymbolInfo(name: "heart.fill", minimumVersion: "13.0")
 		let med = ANMedicationConcept(
 			clinicalName: "Sensitive Drug Name",
 			nickname: "My Secret Med",
 			quantity: 30.0,
 			initialQuantity: 60.0,
-			displayColorHex: "#FF5722"
+			displayColorHex: "#FF5722",
+			symbolInfo: symbolInfo
 		)
 
 		let redacted = med.redacted()
@@ -57,6 +64,7 @@ struct ANModelKitModelTests {
 		#expect(redacted.quantity == 30.0) // Non-sensitive data preserved
 		#expect(redacted.initialQuantity == 60.0) // Non-sensitive data preserved
 		#expect(redacted.displayColorHex == "#FF5722") // Non-sensitive data preserved
+		#expect(redacted.symbolInfo?.name == "heart.fill") // Symbol info preserved
 		#expect(redacted.id == med.id) // ID preserved
 	}
 	
@@ -389,5 +397,264 @@ struct ANEventTypeTests {
 			set.insert(eventType)
 		}
 		#expect(set.count == allCases.count)
+	}
+}
+
+@Suite("ANSymbolInfo Tests")
+struct ANSymbolInfoTests {
+	@Test("ANSymbolInfo initialization and properties")
+	func testSymbolInfoInit() async throws {
+		let symbol = ANSymbolInfo(name: "pills.fill", minimumVersion: "14.0", fallbackName: "pills")
+		#expect(symbol.name == "pills.fill")
+		#expect(symbol.minimumVersion == "14.0")
+		#expect(symbol.fallbackName == "pills")
+	}
+
+	@Test("ANSymbolInfo with minimal initialization")
+	func testSymbolInfoMinimal() async throws {
+		let symbol = ANSymbolInfo(name: "heart")
+		#expect(symbol.name == "heart")
+		#expect(symbol.minimumVersion == nil)
+		#expect(symbol.fallbackName == nil)
+	}
+
+	@Test("ANSymbolInfo Codable")
+	func testSymbolInfoCodable() async throws {
+		let original = ANSymbolInfo(name: "syringe.fill", minimumVersion: "14.0", fallbackName: "syringe")
+		let encoder = JSONEncoder()
+		let decoder = JSONDecoder()
+
+		let data = try encoder.encode(original)
+		let decoded = try decoder.decode(ANSymbolInfo.self, from: data)
+
+		#expect(decoded.name == original.name)
+		#expect(decoded.minimumVersion == original.minimumVersion)
+		#expect(decoded.fallbackName == original.fallbackName)
+	}
+
+	@Test("ANSymbolInfo availableSymbolName with version check")
+	func testAvailableSymbolName() async throws {
+		let symbol = ANSymbolInfo(name: "pills.fill", minimumVersion: "14.0", fallbackName: "pills")
+
+		// Test with higher version (should return primary)
+		#expect(symbol.availableSymbolName(for: "15.0") == "pills.fill")
+
+		// Test with lower version (should return fallback)
+		#expect(symbol.availableSymbolName(for: "13.0") == "pills")
+
+		// Test with exact version (should return primary)
+		#expect(symbol.availableSymbolName(for: "14.0") == "pills.fill")
+
+		// Test without minimum version (should always return primary)
+		let noMinSymbol = ANSymbolInfo(name: "star", fallbackName: "star.fill")
+		#expect(noMinSymbol.availableSymbolName(for: "13.0") == "star")
+		#expect(noMinSymbol.availableSymbolName(for: "17.0") == "star")
+	}
+}
+
+@Suite("ANSymbolManager Tests")
+struct ANSymbolManagerTests {
+	@Test("ANSymbolManager singleton access")
+	func testSingletonAccess() async throws {
+		let manager = ANSymbolManager.shared
+		#expect(manager != nil)
+	}
+
+	@Test("Symbol search by exact name")
+	func testSearchByExactName() async throws {
+		let manager = ANSymbolManager.shared
+		let results = manager.searchSymbols(query: "pills.fill")
+		#expect(results.count > 0)
+		#expect(results.first?.symbol.name == "pills.fill")
+		#expect(results.first?.relevanceScore == 100) // Exact match
+	}
+
+	@Test("Symbol search by partial name")
+	func testSearchByPartialName() async throws {
+		let manager = ANSymbolManager.shared
+		let results = manager.searchSymbols(query: "pill")
+		#expect(results.count > 0)
+		// Should find "pills" and "pills.fill"
+		let names = results.map { $0.symbol.name }
+		#expect(names.contains("pills") || names.contains("pills.fill"))
+	}
+
+	@Test("Symbol search by description")
+	func testSearchByDescription() async throws {
+		let manager = ANSymbolManager.shared
+		let results = manager.searchSymbols(query: "morning")
+		#expect(results.count > 0)
+		// Should find sun/sunrise symbols based on description
+		let found = results.contains { result in
+			result.symbol.name.contains("sun") || result.symbol.name.contains("sunrise")
+		}
+		#expect(found)
+	}
+
+	@Test("Symbol search by keywords")
+	func testSearchByKeywords() async throws {
+		let manager = ANSymbolManager.shared
+		let results = manager.searchSymbols(query: "injection")
+		#expect(results.count > 0)
+		// Should find syringe symbols
+		let found = results.contains { $0.symbol.name.contains("syringe") }
+		#expect(found)
+	}
+
+	@Test("Symbol search with category filter")
+	func testSearchWithCategoryFilter() async throws {
+		let manager = ANSymbolManager.shared
+		let results = manager.searchSymbols(query: "fill", category: .medication)
+		#expect(results.count > 0)
+		// All results should be in medication category
+		for result in results {
+			#expect(result.symbol.category == .medication)
+		}
+	}
+
+	@Test("Get suggested symbols for medication names")
+	func testGetSuggestedSymbols() async throws {
+		let manager = ANSymbolManager.shared
+
+		// Test pill-related medication
+		let pillResults = manager.getSuggestedSymbols(for: "Aspirin Tablet")
+		#expect(pillResults.count > 0)
+		#expect(pillResults.first?.symbol.name == "pills.fill")
+
+		// Test injection-related medication
+		let injectionResults = manager.getSuggestedSymbols(for: "Insulin Injection")
+		#expect(injectionResults.count > 0)
+		#expect(injectionResults.first?.symbol.name == "syringe.fill")
+
+		// Test liquid medication
+		let liquidResults = manager.getSuggestedSymbols(for: "Cough Syrup Liquid")
+		#expect(liquidResults.count > 0)
+		#expect(liquidResults.first?.symbol.name == "drop.fill")
+	}
+
+	@Test("Get symbol info by name")
+	func testGetSymbolInfo() async throws {
+		let manager = ANSymbolManager.shared
+		let info = manager.getSymbolInfo("heart.fill")
+		#expect(info != nil)
+		#expect(info?.name == "heart.fill")
+		#expect(info?.category == .health)
+	}
+
+	@Test("Get symbols by category")
+	func testGetSymbolsByCategory() async throws {
+		let manager = ANSymbolManager.shared
+
+		let medicalSymbols = manager.getSymbolsByCategory(.medical)
+		#expect(medicalSymbols.count > 0)
+		for symbol in medicalSymbols {
+			#expect(symbol.category == .medical)
+		}
+
+		let timeSymbols = manager.getSymbolsByCategory(.time)
+		#expect(timeSymbols.count > 0)
+		for symbol in timeSymbols {
+			#expect(symbol.category == .time)
+		}
+	}
+
+	@Test("Check symbol availability by version")
+	func testIsSymbolAvailable() async throws {
+		let manager = ANSymbolManager.shared
+
+		// Pills.fill requires iOS 14.0
+		#expect(manager.isSymbolAvailable("pills.fill", for: "14.0"))
+		#expect(manager.isSymbolAvailable("pills.fill", for: "15.0"))
+		#expect(!manager.isSymbolAvailable("pills.fill", for: "13.0"))
+
+		// Heart is available from iOS 13.0
+		#expect(manager.isSymbolAvailable("heart", for: "13.0"))
+		#expect(manager.isSymbolAvailable("heart", for: "17.0"))
+	}
+
+	@Test("Get all categories")
+	func testGetAllCategories() async throws {
+		let manager = ANSymbolManager.shared
+		let categories = manager.getAllCategories()
+		#expect(categories.count == ANSymbolManager.SymbolCategory.allCases.count)
+		#expect(categories.contains(.medical))
+		#expect(categories.contains(.medication))
+		#expect(categories.contains(.health))
+		#expect(categories.contains(.time))
+	}
+}
+
+@Suite("ANSymbolDatabase Tests")
+struct ANSymbolDatabaseTests {
+	@Test("Database contains expected symbols")
+	func testDatabaseContainsExpectedSymbols() async throws {
+		let symbols = ANSymbolDatabase.symbols
+		#expect(symbols.count > 50) // Should have a substantial number of symbols
+
+		// Check for specific important medical symbols
+		let expectedSymbols = ["pills", "pills.fill", "syringe", "syringe.fill",
+							   "heart", "heart.fill", "drop", "drop.fill"]
+
+		for expectedName in expectedSymbols {
+			let found = symbols.contains { $0.name == expectedName }
+			#expect(found, "Expected to find symbol: \(expectedName)")
+		}
+	}
+
+	@Test("All symbols have descriptions")
+	func testAllSymbolsHaveDescriptions() async throws {
+		let symbols = ANSymbolDatabase.symbols
+		for symbol in symbols {
+			#expect(!symbol.description.isEmpty)
+			#expect(symbol.description.count > 10) // Description should be meaningful
+		}
+	}
+
+	@Test("All symbols have valid categories")
+	func testAllSymbolsHaveValidCategories() async throws {
+		let symbols = ANSymbolDatabase.symbols
+		let validCategories = Set(ANSymbolManager.SymbolCategory.allCases)
+
+		for symbol in symbols {
+			#expect(validCategories.contains(symbol.category))
+		}
+	}
+
+	@Test("Symbol metadata structure")
+	func testSymbolMetadataStructure() async throws {
+		// Test a specific symbol's metadata
+		let pillSymbol = ANSymbolDatabase.symbols.first { $0.name == "pills.fill" }
+		#expect(pillSymbol != nil)
+		#expect(pillSymbol?.category == .medication)
+		#expect(pillSymbol?.minimumVersion == "14.0")
+		#expect(pillSymbol?.description.contains("pill") == true)
+		#expect(pillSymbol?.keywords.contains("medicine") == true)
+	}
+
+	@Test("Database includes general purpose symbols")
+	func testGeneralPurposeSymbols() async throws {
+		let symbols = ANSymbolDatabase.symbols
+
+		// Check for general symbols that can be used with medications
+		let generalSymbols = ["star", "star.fill", "flag", "flag.fill",
+							  "arrow.up", "arrow.down", "checkmark.circle"]
+
+		for symbolName in generalSymbols {
+			let found = symbols.contains { $0.name == symbolName }
+			#expect(found, "Expected to find general symbol: \(symbolName)")
+		}
+	}
+
+	@Test("Database includes time-related symbols")
+	func testTimeRelatedSymbols() async throws {
+		let symbols = ANSymbolDatabase.symbols
+
+		// Check for time/schedule symbols
+		let timeSymbols = ["clock", "alarm", "moon", "sun.max", "calendar"]
+
+		for symbolName in timeSymbols {
+			let found = symbols.contains { $0.name == symbolName }
+			#expect(found, "Expected to find time symbol: \(symbolName)")
+		}
 	}
 }
