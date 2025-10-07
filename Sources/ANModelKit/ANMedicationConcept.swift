@@ -1,7 +1,7 @@
 import Foundation
 
 /// Represents a medication definition with a clinical name and optional user nickname.
-public struct ANMedicationConcept: Identifiable, Codable, Equatable, Hashable, Sendable {
+public struct ANMedicationConcept: Identifiable, Equatable, Hashable, Sendable {
 	/// Unique identifier for this medication concept (Boutique best practice)
 	public let id: UUID
 	/// The official/clinical name of the medication
@@ -78,5 +78,68 @@ public struct ANMedicationConcept: Identifiable, Codable, Equatable, Hashable, S
 			isArchived: isArchived,
 			hasSchedule: hasSchedule
 		)
+	}
+}
+
+// MARK: - Codable
+extension ANMedicationConcept: Codable {
+	public init(from decoder: Decoder) throws {
+		let container = try decoder.container(keyedBy: CodingKeys.self)
+
+		id = try container.decode(UUID.self, forKey: .id)
+		clinicalName = try container.decode(String.self, forKey: .clinicalName)
+		nickname = try container.decodeIfPresent(String.self, forKey: .nickname)
+		quantity = try container.decodeIfPresent(Double.self, forKey: .quantity)
+		initialQuantity = try container.decodeIfPresent(Double.self, forKey: .initialQuantity)
+		displayColorHex = try container.decodeIfPresent(String.self, forKey: .displayColorHex)
+		lastRefillDate = try container.decodeIfPresent(Date.self, forKey: .lastRefillDate)
+		nextRefillDate = try container.decodeIfPresent(Date.self, forKey: .nextRefillDate)
+		prescribedUnit = try container.decodeIfPresent(ANUnitConcept.self, forKey: .prescribedUnit)
+		prescribedDoseAmount = try container.decodeIfPresent(Double.self, forKey: .prescribedDoseAmount)
+		symbolInfo = try container.decodeIfPresent(ANSymbolInfo.self, forKey: .symbolInfo)
+		rxNormCode = try container.decodeIfPresent(String.self, forKey: .rxNormCode)
+		generalForm = try container.decodeIfPresent(String.self, forKey: .generalForm)
+
+		// Provide default values for backwards compatibility with older JSON formats
+		isArchived = try container.decodeIfPresent(Bool.self, forKey: .isArchived) ?? false
+		hasSchedule = try container.decodeIfPresent(Bool.self, forKey: .hasSchedule) ?? false
+	}
+
+	public func encode(to encoder: Encoder) throws {
+		var container = encoder.container(keyedBy: CodingKeys.self)
+
+		try container.encode(id, forKey: .id)
+		try container.encode(clinicalName, forKey: .clinicalName)
+		try container.encodeIfPresent(nickname, forKey: .nickname)
+		try container.encodeIfPresent(quantity, forKey: .quantity)
+		try container.encodeIfPresent(initialQuantity, forKey: .initialQuantity)
+		try container.encodeIfPresent(displayColorHex, forKey: .displayColorHex)
+		try container.encodeIfPresent(lastRefillDate, forKey: .lastRefillDate)
+		try container.encodeIfPresent(nextRefillDate, forKey: .nextRefillDate)
+		try container.encodeIfPresent(prescribedUnit, forKey: .prescribedUnit)
+		try container.encodeIfPresent(prescribedDoseAmount, forKey: .prescribedDoseAmount)
+		try container.encodeIfPresent(symbolInfo, forKey: .symbolInfo)
+		try container.encodeIfPresent(rxNormCode, forKey: .rxNormCode)
+		try container.encodeIfPresent(generalForm, forKey: .generalForm)
+		try container.encode(isArchived, forKey: .isArchived)
+		try container.encode(hasSchedule, forKey: .hasSchedule)
+	}
+
+	private enum CodingKeys: String, CodingKey {
+		case id
+		case clinicalName
+		case nickname
+		case quantity
+		case initialQuantity
+		case displayColorHex
+		case lastRefillDate
+		case nextRefillDate
+		case prescribedUnit
+		case prescribedDoseAmount
+		case symbolInfo
+		case rxNormCode
+		case generalForm
+		case isArchived
+		case hasSchedule
 	}
 }
