@@ -209,4 +209,69 @@ public enum ANUnitConcept: String, Codable, CaseIterable, Equatable, Hashable, S
 			.pen
 		]
 	}
+
+	// MARK: - HealthKit Integration Utilities
+
+	/// Indicates if this unit is weight-based (mass measurement)
+	public var isWeightBased: Bool {
+		switch self {
+		case .milligram, .gram, .microgram:
+			return true
+		default:
+			return false
+		}
+	}
+
+	/// Indicates if this unit is volume-based (liquid measurement)
+	public var isVolumeBased: Bool {
+		switch self {
+		case .milliliter, .liter, .teaspoon, .tablespoon, .drop:
+			return true
+		default:
+			return false
+		}
+	}
+
+	/// Indicates if this unit is count-based (discrete items)
+	public var isCountBased: Bool {
+		switch self {
+		case .tablet, .capsule, .chewable, .lozenge, .suppository, .puff, .nebule,
+			 .injection, .pen, .inhaler, .vial, .patch, .application, .spray, .strip,
+			 .film, .dose, .ampule, .sachet, .bowl, .joint, .dab, .unit:
+			return true
+		default:
+			return false
+		}
+	}
+
+	/// Returns the HealthKit-compatible general form category for this unit
+	/// Maps ANUnitConcept to common medication forms used in HealthKit
+	public var healthKitGeneralForm: String {
+		switch self {
+		case .tablet, .chewable:
+			return "tablet"
+		case .capsule:
+			return "capsule"
+		case .milliliter, .liter, .teaspoon, .tablespoon, .drop:
+			return "liquid"
+		case .puff, .inhaler, .nebule:
+			return "inhaler"
+		case .patch:
+			return "patch"
+		case .suppository:
+			return "suppository"
+		case .injection, .pen, .vial, .ampule:
+			return "injection"
+		case .spray:
+			return "spray"
+		case .lozenge:
+			return "lozenge"
+		case .film, .strip:
+			return "film"
+		case .sachet:
+			return "powder"
+		default:
+			return "other"
+		}
+	}
 }

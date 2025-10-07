@@ -23,8 +23,23 @@ public struct ANMedicationConcept: Identifiable, Codable, Equatable, Hashable, S
 	/// Prescribed Dose Amount
 	public var prescribedDoseAmount: Double?
 
+	// MARK: - HealthKit Integration Properties
+
+	/// RxNorm code for clinical interoperability (e.g., "308192" for "Amoxicillin Trihydrate 500mg Oral Tablet")
+	/// Used to standardize medication identification across health systems
+	public var rxNormCode: String?
+	/// Physical form of the medication (e.g., "tablet", "capsule", "liquid")
+	/// Maps to HealthKit's HKMedicationConcept generalForm
+	public var generalForm: String?
+	/// Indicates if the medication is archived/no longer being taken
+	/// Maps to HealthKit's HKUserAnnotatedMedication isArchived
+	public var isArchived: Bool
+	/// Indicates if the medication has a reminder schedule set up
+	/// Maps to HealthKit's HKUserAnnotatedMedication hasSchedule
+	public var hasSchedule: Bool
+
 	/// Initialize a new medication concept
-	public init(id: UUID = UUID(), clinicalName: String, nickname: String? = nil, quantity: Double? = nil, initialQuantity: Double? = nil, displayColorHex: String? = nil, lastRefillDate: Date? = nil, nextRefillDate: Date? = nil, prescribedUnit: ANUnitConcept? = nil, prescribedDoseAmount: Double? = nil) {
+	public init(id: UUID = UUID(), clinicalName: String, nickname: String? = nil, quantity: Double? = nil, initialQuantity: Double? = nil, displayColorHex: String? = nil, lastRefillDate: Date? = nil, nextRefillDate: Date? = nil, prescribedUnit: ANUnitConcept? = nil, prescribedDoseAmount: Double? = nil, rxNormCode: String? = nil, generalForm: String? = nil, isArchived: Bool = false, hasSchedule: Bool = false) {
 		self.id = id
 		self.clinicalName = clinicalName
 		self.nickname = nickname
@@ -35,6 +50,10 @@ public struct ANMedicationConcept: Identifiable, Codable, Equatable, Hashable, S
 		self.nextRefillDate = nextRefillDate
 		self.prescribedUnit = prescribedUnit
 		self.prescribedDoseAmount = prescribedDoseAmount
+		self.rxNormCode = rxNormCode
+		self.generalForm = generalForm
+		self.isArchived = isArchived
+		self.hasSchedule = hasSchedule
 	}
 	
 	/// Create a redacted version with clinical names and nicknames removed
@@ -49,7 +68,11 @@ public struct ANMedicationConcept: Identifiable, Codable, Equatable, Hashable, S
 			lastRefillDate: lastRefillDate,
 			nextRefillDate: nextRefillDate,
 			prescribedUnit: prescribedUnit,
-			prescribedDoseAmount: prescribedDoseAmount
+			prescribedDoseAmount: prescribedDoseAmount,
+			rxNormCode: rxNormCode,
+			generalForm: generalForm,
+			isArchived: isArchived,
+			hasSchedule: hasSchedule
 		)
 	}
 }
