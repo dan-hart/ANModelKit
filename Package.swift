@@ -18,6 +18,10 @@ let package = Package(
 			name: "ANModelKit",
 			targets: ["ANModelKit"]
 		),
+		.library(
+			name: "ANModelKitHealthKit",
+			targets: ["ANModelKitHealthKit"]
+		),
 	], dependencies: [
 	],
 	targets: [
@@ -27,9 +31,20 @@ let package = Package(
 			name: "ANModelKit",
 			dependencies: []
 		),
+		.target(
+			name: "ANModelKitHealthKit",
+			dependencies: ["ANModelKit"],
+			swiftSettings: [
+				.define("HEALTHKIT_AVAILABLE", .when(platforms: [.iOS, .watchOS, .visionOS]))
+			]
+		),
 		.testTarget(
 			name: "ANModelKitTests",
 			dependencies: ["ANModelKit"]
+		),
+		.testTarget(
+			name: "ANModelKitHealthKitTests",
+			dependencies: ["ANModelKitHealthKit"]
 		),
 	]
 )
