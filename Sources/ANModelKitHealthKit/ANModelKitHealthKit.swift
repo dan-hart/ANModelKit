@@ -38,9 +38,13 @@ public struct ANModelKitHealthKit {
 	public static let version = "1.0.0"
 
 	/// Indicates whether HealthKit is available on the current platform
+	///
+	/// This performs a runtime check using `HKHealthStore.isHealthDataAvailable()`
+	/// to properly detect HealthKit availability. HealthKit is available on iPhone
+	/// and Apple Watch, but not on iPad or other platforms.
 	public static var isHealthKitAvailable: Bool {
 		#if canImport(HealthKit)
-		return true
+		return HKHealthStore.isHealthDataAvailable()
 		#else
 		return false
 		#endif
