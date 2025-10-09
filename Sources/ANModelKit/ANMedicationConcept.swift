@@ -25,23 +25,16 @@ public struct ANMedicationConcept: Identifiable, Equatable, Hashable, Sendable {
 	/// SF Symbol configuration for visual representation
 	public var symbolInfo: ANSymbolInfo?
 
-	// MARK: - HealthKit Integration Properties
+	// MARK: - Additional Properties
 
 	/// RxNorm code for clinical interoperability (e.g., "308192" for "Amoxicillin Trihydrate 500mg Oral Tablet")
 	/// Used to standardize medication identification across health systems
 	public var rxNormCode: String?
-	/// Physical form of the medication (e.g., "tablet", "capsule", "liquid")
-	/// Maps to HealthKit's HKMedicationConcept generalForm
-	public var generalForm: String?
 	/// Indicates if the medication is archived/no longer being taken
-	/// Maps to HealthKit's HKUserAnnotatedMedication isArchived
 	public var isArchived: Bool
-	/// Indicates if the medication has a reminder schedule set up
-	/// Maps to HealthKit's HKUserAnnotatedMedication hasSchedule
-	public var hasSchedule: Bool
 
 	/// Initialize a new medication concept
-	public init(id: UUID = UUID(), clinicalName: String, nickname: String? = nil, quantity: Double? = nil, initialQuantity: Double? = nil, displayColorHex: String? = nil, lastRefillDate: Date? = nil, nextRefillDate: Date? = nil, prescribedUnit: ANUnitConcept? = nil, prescribedDoseAmount: Double? = nil, symbolInfo: ANSymbolInfo? = nil, rxNormCode: String? = nil, generalForm: String? = nil, isArchived: Bool = false, hasSchedule: Bool = false) {
+	public init(id: UUID = UUID(), clinicalName: String, nickname: String? = nil, quantity: Double? = nil, initialQuantity: Double? = nil, displayColorHex: String? = nil, lastRefillDate: Date? = nil, nextRefillDate: Date? = nil, prescribedUnit: ANUnitConcept? = nil, prescribedDoseAmount: Double? = nil, symbolInfo: ANSymbolInfo? = nil, rxNormCode: String? = nil, isArchived: Bool = false) {
 		self.id = id
 		self.clinicalName = clinicalName
 		self.nickname = nickname
@@ -54,9 +47,7 @@ public struct ANMedicationConcept: Identifiable, Equatable, Hashable, Sendable {
 		self.prescribedDoseAmount = prescribedDoseAmount
 		self.symbolInfo = symbolInfo
 		self.rxNormCode = rxNormCode
-		self.generalForm = generalForm
 		self.isArchived = isArchived
-		self.hasSchedule = hasSchedule
 	}
 	
 	/// Create a redacted version with clinical names and nicknames removed
@@ -74,9 +65,7 @@ public struct ANMedicationConcept: Identifiable, Equatable, Hashable, Sendable {
 			prescribedDoseAmount: prescribedDoseAmount,
 			symbolInfo: symbolInfo,
 			rxNormCode: rxNormCode,
-			generalForm: generalForm,
-			isArchived: isArchived,
-			hasSchedule: hasSchedule
+			isArchived: isArchived
 		)
 	}
 }
@@ -98,11 +87,9 @@ extension ANMedicationConcept: Codable {
 		prescribedDoseAmount = try container.decodeIfPresent(Double.self, forKey: .prescribedDoseAmount)
 		symbolInfo = try container.decodeIfPresent(ANSymbolInfo.self, forKey: .symbolInfo)
 		rxNormCode = try container.decodeIfPresent(String.self, forKey: .rxNormCode)
-		generalForm = try container.decodeIfPresent(String.self, forKey: .generalForm)
 
-		// Provide default values for backwards compatibility with older JSON formats
+		// Provide default value for backwards compatibility with older JSON formats
 		isArchived = try container.decodeIfPresent(Bool.self, forKey: .isArchived) ?? false
-		hasSchedule = try container.decodeIfPresent(Bool.self, forKey: .hasSchedule) ?? false
 	}
 
 	public func encode(to encoder: Encoder) throws {
@@ -120,9 +107,7 @@ extension ANMedicationConcept: Codable {
 		try container.encodeIfPresent(prescribedDoseAmount, forKey: .prescribedDoseAmount)
 		try container.encodeIfPresent(symbolInfo, forKey: .symbolInfo)
 		try container.encodeIfPresent(rxNormCode, forKey: .rxNormCode)
-		try container.encodeIfPresent(generalForm, forKey: .generalForm)
 		try container.encode(isArchived, forKey: .isArchived)
-		try container.encode(hasSchedule, forKey: .hasSchedule)
 	}
 
 	private enum CodingKeys: String, CodingKey {
@@ -138,8 +123,6 @@ extension ANMedicationConcept: Codable {
 		case prescribedDoseAmount
 		case symbolInfo
 		case rxNormCode
-		case generalForm
 		case isArchived
-		case hasSchedule
 	}
 }

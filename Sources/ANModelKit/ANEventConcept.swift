@@ -7,15 +7,6 @@ public enum ANEventType: String, Codable, CaseIterable, Equatable, Hashable, Sen
 	case suspectedSideEffect = "suspected_side_effect"
 }
 
-/// Log status for dose events, matching HealthKit's HKMedicationDoseEvent log status.
-public enum ANDoseLogStatus: String, Codable, CaseIterable, Equatable, Hashable, Sendable {
-	/// The dose was taken as logged
-	case taken
-	/// The dose was explicitly skipped
-	case skipped
-	/// The dose reminder was snoozed for later
-	case snoozed
-}
 
 /// Represents a logged event (such as a dose taken, or a reconciliation).
 public struct ANEventConcept: Identifiable, Codable, Equatable, Hashable, Sendable {
@@ -32,11 +23,8 @@ public struct ANEventConcept: Identifiable, Codable, Equatable, Hashable, Sendab
 	/// Optional note associated with the event
 	public var note: String?
 
-	// MARK: - HealthKit Integration Properties
+	// MARK: - Additional Properties
 
-	/// Log status for dose events (taken, skipped, snoozed)
-	/// Maps to HealthKit's HKMedicationDoseEvent log status
-	public var logStatus: ANDoseLogStatus?
 	/// The scheduled dose amount (what was supposed to be taken)
 	/// Used when the actual dose differs from the scheduled dose
 	public var scheduledDoseAmount: Double?
@@ -52,7 +40,6 @@ public struct ANEventConcept: Identifiable, Codable, Equatable, Hashable, Sendab
 		dose: ANDoseConcept? = nil,
 		date: Date = Date(),
 		note: String? = nil,
-		logStatus: ANDoseLogStatus? = nil,
 		scheduledDoseAmount: Double? = nil,
 		scheduledDoseUnit: ANUnitConcept? = nil
 	) {
@@ -62,7 +49,6 @@ public struct ANEventConcept: Identifiable, Codable, Equatable, Hashable, Sendab
 		self.dose = dose
 		self.date = date
 		self.note = note
-		self.logStatus = logStatus
 		self.scheduledDoseAmount = scheduledDoseAmount
 		self.scheduledDoseUnit = scheduledDoseUnit
 	}
@@ -76,7 +62,6 @@ public struct ANEventConcept: Identifiable, Codable, Equatable, Hashable, Sendab
 			dose: dose,
 			date: date,
 			note: note,
-			logStatus: logStatus,
 			scheduledDoseAmount: scheduledDoseAmount,
 			scheduledDoseUnit: scheduledDoseUnit
 		)

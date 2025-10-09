@@ -210,7 +210,7 @@ public enum ANUnitConcept: String, Codable, CaseIterable, Equatable, Hashable, S
 		]
 	}
 
-	// MARK: - HealthKit Integration Utilities
+	// MARK: - Unit Properties
 
 	/// Indicates if this unit is weight-based (mass measurement)
 	public var isWeightBased: Bool {
@@ -244,34 +244,4 @@ public enum ANUnitConcept: String, Codable, CaseIterable, Equatable, Hashable, S
 		}
 	}
 
-	/// Returns the HealthKit-compatible general form category for this unit
-	/// Maps ANUnitConcept to common medication forms used in HealthKit
-	public var healthKitGeneralForm: String {
-		switch self {
-		case .tablet, .chewable:
-			return "tablet"
-		case .capsule:
-			return "capsule"
-		case .milliliter, .liter, .teaspoon, .tablespoon, .drop:
-			return "liquid"
-		case .puff, .inhaler, .nebule:
-			return "inhaler"
-		case .patch:
-			return "patch"
-		case .suppository:
-			return "suppository"
-		case .injection, .pen, .vial, .ampule:
-			return "injection"
-		case .spray:
-			return "spray"
-		case .lozenge:
-			return "lozenge"
-		case .film, .strip:
-			return "film"
-		case .sachet:
-			return "powder"
-		default:
-			return "other"
-		}
-	}
 }

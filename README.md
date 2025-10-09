@@ -24,9 +24,7 @@ A Swift package providing robust data models for medication tracking and dose lo
 - ✅ **Boutique Compatible**: Uses UUID identifiers following Boutique best practices
 - ✅ **Fully Tested**: Comprehensive test coverage with 25+ unit tests
 - ✅ **Zero Dependencies**: Pure Swift with Foundation only
-- 🆕 **HealthKit Integration**: Optional module for iOS 26+ HealthKit Medications API
-- 🆕 **RxNorm Support**: Clinical interoperability with standardized medication codes
-- 🆕 **Bidirectional Sync**: Keep data in sync with Apple Health app
+- ✅ **RxNorm Support**: Clinical interoperability with standardized medication codes
 
 ## Installation
 
@@ -38,9 +36,6 @@ Add ANModelKit to your project via Xcode or by adding it to your `Package.swift`
 dependencies: [
     .package(url: "https://github.com/dan-hart/ANModelKit.git", from: "1.0.0")
 ]
-
-// For HealthKit integration, also add:
-.product(name: "ANModelKitHealthKit", package: "ANModelKit")
 ```
 
 ## Quick Start
@@ -297,16 +292,9 @@ extension MedicationEntity {
 
 ## Requirements
 
-### Core Package
 - **Swift**: 6.2+
 - **Platforms**: iOS 17.0+ / macOS 14.0+ / watchOS 10.0+ / tvOS 17.0+ / visionOS 1.0+
 - **Dependencies**: None (Foundation only)
-
-### HealthKit Integration (Optional)
-- **Swift**: 6.2+
-- **Platforms**: iOS 26.0+ / watchOS 13.0+ / visionOS 3.0+
-- **Dependencies**: ANModelKit, HealthKit framework
-- **Note**: Requires HealthKit entitlement in your app
 
 ## Architecture Notes
 
@@ -349,251 +337,22 @@ Contributions are welcome! Please feel free to submit a Pull Request. For major 
 - **Medical Disclaimers**: Always consult healthcare professionals for medical advice
 - **Privacy**: Review privacy handling before storing sensitive medical data
 
-## HealthKit Integration
+## HealthKit Support
 
-ANModelKit provides optional HealthKit integration through the `ANModelKitHealthKit` module, enabling seamless synchronization with Apple's Health app medication data (iOS 26+).
+AsNeeded currently does not support HealthKit integration for the following reasons:
 
-### Setup
+### 1. Platform Independence
+AsNeeded is designed to be a standalone medication tracking platform. Adding HealthKit sync would create confusion about where your data lives and fragment the user experience between multiple apps.
 
-1. **Add HealthKit Capability**
-   - In Xcode, add HealthKit capability to your target
-   - Enable "Clinical Health Records" in capabilities
+### 2. Apple Platform Restrictions
+Apple does not allow third-party apps to write medication data to HealthKit. This would force users to log doses in the Health app but view trends in AsNeeded—a poor and confusing user experience.
 
-2. **Update Info.plist**
-   ```xml
-   <key>NSHealthShareUsageDescription</key>
-   <string>We need access to your medication data to track your doses</string>
-   <key>NSHealthUpdateUsageDescription</key>
-   <string>We need to save dose events to your Health app</string>
-   ```
+### 3. Privacy & Data Control
+Users choose AsNeeded for its simplicity and complete data privacy. Your medication data stays entirely on your device, never touching the cloud or external services. You have full control over your sensitive health information.
 
-3. **Import the Module**
-   ```swift
-   import ANModelKit
-   import ANModelKitHealthKit
-   ```
+---
 
-### Authorization
-
-Request authorization before accessing HealthKit medication data:
-
-```swift
-#if canImport(HealthKit)
-import ANModelKitHealthKit
-
-let auth = ANHealthKitAuthorization.shared
-
-do {
-    try await auth.requestMedicationAuthorization()
-    print("Authorization granted")
-} catch {
-    print("Authorization failed: \(error)")
-}
-#endif
-```
-
-### Reading Medications from HealthKit
-
-```swift
-let queryHelper = ANHealthKitQuery()
-
-// Fetch active medications
-let medications = try await queryHelper.fetchActiveMedications()
-
-// Fetch all medications including archived
-let allMedications = try await queryHelper.fetchAllMedications()
-
-// Fetch only medications with schedules
-let scheduled = try await queryHelper.fetchMedications(
-    includeArchived: false,
-    onlyWithSchedule: true
-)
-```
-
-### Reading Dose Events
-
-```swift
-// Fetch dose events for a date range
-let weekAgo = Calendar.current.date(byAdding: .day, value: -7, to: Date())!
-let events = try await queryHelper.fetchDoseEvents(from: weekAgo, to: Date())
-
-// Fetch dose events for specific medication
-let medEvents = try await queryHelper.fetchDoseEvents(for: medication)
-
-// Fetch recent dose events (last 7 days)
-let recentEvents = try await queryHelper.fetchRecentDoseEvents()
-```
-
-### Writing Dose Events
-
-```swift
-let event = ANEventConcept(
-    eventType: .doseTaken,
-    medication: medication,
-    dose: dose,
-    logStatus: .taken
-)
-
-try await queryHelper.saveDoseEvent(event)
-```
-
-### Synchronization Options
-
-ANModelKit provides flexible sync patterns for different use cases:
-
-| Sync Type | Direction | Method | Use Case |
-|-----------|-----------|--------|----------|
-| **Pull** | HealthKit → Local | `pullFromHealthKit()` | Import from Health app, initial setup |
-| **Push** | Local → HealthKit | `pushToHealthKit()` | Backup dose events, migration |
-| **Bidirectional** | ↔️ Both ways | `performFullSync()` | Keep everything in sync |
-
-#### One-Way Sync: Pull from HealthKit → Local
-
-Fetch HealthKit data without pushing local changes:
-
-```swift
-let syncManager = ANHealthKitSync()
-
-// Pull all medications and recent dose events from HealthKit
-let result = try await syncManager.pullFromHealthKit(daysOfEvents: 30)
-
-// Update local storage with HealthKit data
-myMedications = result.medicationsAdded
-myEvents = result.eventsAdded
-
-print("Pulled \(result.medicationsAdded.count) medications from HealthKit")
-print("Pulled \(result.eventsAdded.count) dose events from HealthKit")
-```
-
-**Use cases:**
-- Initial app setup/onboarding
-- User wants to import from Health app
-- Ensuring local data matches HealthKit
-
-#### One-Way Sync: Push from Local → HealthKit
-
-Push local dose events to HealthKit without fetching:
-
-```swift
-// Push local dose events to HealthKit
-let result = try await syncManager.pushToHealthKit(events: myLocalEvents)
-
-if result.errors.isEmpty {
-    print("Successfully pushed \(myLocalEvents.count) events to HealthKit")
-} else {
-    print("Failed to push \(result.errors.count) events")
-}
-```
-
-**Use cases:**
-- Backup local data to HealthKit
-- Migrating from another app
-- Ensuring HealthKit has complete history
-
-**Note:** Only dose events can be pushed. Medications are managed by the user in the Health app.
-
-#### Bidirectional Sync
-
-Keep your local data in sync with HealthKit in both directions:
-
-```swift
-let syncManager = ANHealthKitSync()
-
-// Perform full bidirectional sync
-let result = try await syncManager.performFullSync(
-    localMedications: myMedications,
-    localEvents: myEvents,
-    syncStrategy: .newerWins
-)
-
-print("Synced \(result.totalChanges) changes")
-print("Added: \(result.medicationsAdded.count) medications")
-print("Updated: \(result.medicationsUpdated.count) medications")
-
-// Start background sync
-try await syncManager.startBackgroundSync(interval: 300) { syncResult in
-    if syncResult.totalChanges > 0 {
-        // Update your local storage
-        await updateLocalData(with: syncResult)
-    }
-}
-```
-
-**Sync strategies:**
-- `.healthKitWins` - HealthKit data always takes priority
-- `.localWins` - Local data always takes priority
-- `.newerWins` - Most recent modification wins
-- `.custom((local, healthKit) -> ANMedicationConcept)` - Custom resolution logic
-
-### Background Sync with Observer Queries
-
-Monitor real-time changes from HealthKit:
-
-```swift
-let observerQuery = try await queryHelper.observeMedicationChanges { medications in
-    // Handle medication changes
-    await updateUI(with: medications)
-}
-
-// Later, to stop observing:
-healthStore.stop(observerQuery)
-```
-
-### Converting Between ANModelKit and HealthKit
-
-```swift
-// ANMedicationConcept → HealthKit
-#if canImport(HealthKit)
-let hkMedication = try medication.toHKMedicationConcept()
-#endif
-
-// HealthKit → ANMedicationConcept
-let anMedication = try ANMedicationConcept(from: hkUserAnnotatedMedication)
-
-// Update existing medication from HealthKit
-medication.updateFromHealthKit(hkUserAnnotatedMedication)
-
-// Check if medication matches HealthKit data
-if medication.matches(hkUserAnnotatedMedication) {
-    // Same medication
-}
-```
-
-### RxNorm Codes for Clinical Interoperability
-
-```swift
-let medication = ANMedicationConcept(
-    clinicalName: "Amoxicillin Trihydrate 500mg Oral Tablet",
-    rxNormCode: "308192",  // RxNorm code for standardization
-    generalForm: "tablet"   // Physical form
-)
-
-// HealthKit will use the RxNorm code for matching and interoperability
-```
-
-### Platform Availability
-
-HealthKit integration is only available on platforms that support HealthKit:
-
-```swift
-#if canImport(HealthKit)
-if ANModelKitHealthKit.isHealthKitAvailable {
-    // HealthKit features available
-} else {
-    // Fall back to local-only storage
-}
-#endif
-```
-
-### Best Practices
-
-1. **Always check authorization status** before attempting HealthKit operations
-2. **Use incremental sync** for efficiency with `performIncrementalSync()`
-3. **Handle per-object authorization**: Users can selectively share medications
-4. **Store sync anchors** to avoid re-fetching unchanged data
-5. **Implement conflict resolution**: Choose appropriate `ANHealthKitSyncStrategy`
-6. **Test on actual devices**: HealthKit doesn't work in simulator for all features
-7. **Respect user privacy**: Only request the minimum necessary permissions
+We're focused on making AsNeeded the best standalone medication tracker, with features like local backups and exports that give you control without compromising privacy or simplicity.
 
 ---
 
