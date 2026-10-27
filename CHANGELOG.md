@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Optional `minimumHoursBetweenDoses` and `maximumDailyDoseAmount` medication fields for user-saved interval and rolling 24-hour quantity limits in the prescribed unit.
+- Optional `nextDoseNotificationEnabled` medication preference; absent values mean off.
+- Backward-compatible decoding and redaction preservation for dosing fields, with regression tests.
 - Initial release of ANModelKit
 - `ANMedicationConcept` for medication tracking with privacy-focused redaction
 - `ANDoseConcept` for dose amount and unit management

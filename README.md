@@ -85,6 +85,9 @@ public struct ANMedicationConcept: Identifiable, Codable, Equatable, Hashable, S
     public var nextRefillDate: Date?
     public var prescribedUnit: ANUnitConcept?
     public var prescribedDoseAmount: Double?
+    public var minimumHoursBetweenDoses: Double?
+    public var maximumDailyDoseAmount: Double?
+    public var nextDoseNotificationEnabled: Bool?
 }
 ```
 
@@ -94,6 +97,22 @@ public struct ANMedicationConcept: Identifiable, Codable, Equatable, Hashable, S
 - Inventory tracking with quantities and refill dates
 - Prescribed dosing information
 - Privacy-focused `redacted()` method
+
+### Optional dosing limits
+
+`minimumHoursBetweenDoses` stores a user-saved interval in hours. `maximumDailyDoseAmount`
+stores a user-saved maximum total quantity in a **rolling 24 hours**, expressed in
+`prescribedUnit` (for example, tablets or mL), rather than a count of dose events.
+Either limit may be set independently; absent limits remain `nil`.
+
+`nextDoseNotificationEnabled` stores the user's opt-in for an app notification when
+recorded doses next satisfy the saved limits. Missing or `nil` values mean off.
+ANModelKit stores these values only; consuming apps validate inputs, calculate timing,
+and request/schedule notifications. A saved limit is not a medical safety guarantee.
+
+These optional fields decode as `nil` from older medication JSON, remain omitted when
+unset during encoding, and are preserved by `redacted()` along with existing quantities
+and units. Existing initializer calls remain source-compatible.
 
 ### ANDoseConcept
 
