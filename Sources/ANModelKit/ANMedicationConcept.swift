@@ -26,6 +26,8 @@ public struct ANMedicationConcept: Identifiable, Equatable, Hashable, Sendable {
 	public var minimumHoursBetweenDoses: Double?
 	/// Optional maximum total quantity in any rolling 24 hours, measured in prescribedUnit.
 	public var maximumDailyDoseAmount: Double?
+	/// Optional maximum quantity in one recorded dose, measured in prescribedUnit.
+	public var maximumDoseAmount: Double?
 	/// Whether the app should notify when the saved dose limits next permit a dose. Nil means off.
 	public var nextDoseNotificationEnabled: Bool?
 	/// SF Symbol configuration for visual representation
@@ -40,7 +42,25 @@ public struct ANMedicationConcept: Identifiable, Equatable, Hashable, Sendable {
 	public var isArchived: Bool
 
 	/// Initialize a new medication concept
-	public init(id: UUID = UUID(), clinicalName: String, nickname: String? = nil, quantity: Double? = nil, initialQuantity: Double? = nil, displayColorHex: String? = nil, lastRefillDate: Date? = nil, nextRefillDate: Date? = nil, prescribedUnit: ANUnitConcept? = nil, prescribedDoseAmount: Double? = nil, symbolInfo: ANSymbolInfo? = nil, rxNormCode: String? = nil, isArchived: Bool = false, minimumHoursBetweenDoses: Double? = nil, maximumDailyDoseAmount: Double? = nil, nextDoseNotificationEnabled: Bool? = nil) {
+	public init(
+		id: UUID = UUID(),
+		clinicalName: String,
+		nickname: String? = nil,
+		quantity: Double? = nil,
+		initialQuantity: Double? = nil,
+		displayColorHex: String? = nil,
+		lastRefillDate: Date? = nil,
+		nextRefillDate: Date? = nil,
+		prescribedUnit: ANUnitConcept? = nil,
+		prescribedDoseAmount: Double? = nil,
+		symbolInfo: ANSymbolInfo? = nil,
+		rxNormCode: String? = nil,
+		isArchived: Bool = false,
+		minimumHoursBetweenDoses: Double? = nil,
+		maximumDailyDoseAmount: Double? = nil,
+		nextDoseNotificationEnabled: Bool? = nil,
+		maximumDoseAmount: Double? = nil
+	) {
 		self.id = id
 		self.clinicalName = clinicalName
 		self.nickname = nickname
@@ -53,6 +73,7 @@ public struct ANMedicationConcept: Identifiable, Equatable, Hashable, Sendable {
 		self.prescribedDoseAmount = prescribedDoseAmount
 		self.minimumHoursBetweenDoses = minimumHoursBetweenDoses
 		self.maximumDailyDoseAmount = maximumDailyDoseAmount
+		self.maximumDoseAmount = maximumDoseAmount
 		self.nextDoseNotificationEnabled = nextDoseNotificationEnabled
 		self.symbolInfo = symbolInfo
 		self.rxNormCode = rxNormCode
@@ -77,7 +98,8 @@ public struct ANMedicationConcept: Identifiable, Equatable, Hashable, Sendable {
 			isArchived: isArchived,
 			minimumHoursBetweenDoses: minimumHoursBetweenDoses,
 			maximumDailyDoseAmount: maximumDailyDoseAmount,
-			nextDoseNotificationEnabled: nextDoseNotificationEnabled
+			nextDoseNotificationEnabled: nextDoseNotificationEnabled,
+			maximumDoseAmount: maximumDoseAmount
 		)
 	}
 }
@@ -99,6 +121,7 @@ extension ANMedicationConcept: Codable {
 		prescribedDoseAmount = try container.decodeIfPresent(Double.self, forKey: .prescribedDoseAmount)
 		minimumHoursBetweenDoses = try container.decodeIfPresent(Double.self, forKey: .minimumHoursBetweenDoses)
 		maximumDailyDoseAmount = try container.decodeIfPresent(Double.self, forKey: .maximumDailyDoseAmount)
+		maximumDoseAmount = try container.decodeIfPresent(Double.self, forKey: .maximumDoseAmount)
 		nextDoseNotificationEnabled = try container.decodeIfPresent(Bool.self, forKey: .nextDoseNotificationEnabled)
 		symbolInfo = try container.decodeIfPresent(ANSymbolInfo.self, forKey: .symbolInfo)
 		rxNormCode = try container.decodeIfPresent(String.self, forKey: .rxNormCode)
@@ -122,6 +145,7 @@ extension ANMedicationConcept: Codable {
 		try container.encodeIfPresent(prescribedDoseAmount, forKey: .prescribedDoseAmount)
 		try container.encodeIfPresent(minimumHoursBetweenDoses, forKey: .minimumHoursBetweenDoses)
 		try container.encodeIfPresent(maximumDailyDoseAmount, forKey: .maximumDailyDoseAmount)
+		try container.encodeIfPresent(maximumDoseAmount, forKey: .maximumDoseAmount)
 		try container.encodeIfPresent(nextDoseNotificationEnabled, forKey: .nextDoseNotificationEnabled)
 		try container.encodeIfPresent(symbolInfo, forKey: .symbolInfo)
 		try container.encodeIfPresent(rxNormCode, forKey: .rxNormCode)
@@ -141,6 +165,7 @@ extension ANMedicationConcept: Codable {
 		case prescribedDoseAmount
 		case minimumHoursBetweenDoses
 		case maximumDailyDoseAmount
+		case maximumDoseAmount
 		case nextDoseNotificationEnabled
 		case symbolInfo
 		case rxNormCode
